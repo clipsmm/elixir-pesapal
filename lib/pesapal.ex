@@ -2,7 +2,7 @@ defmodule Pesapal do
   @moduledoc """
   Documentation for `Pesapal`.
   """
-  @sandbox_url "https://cybqa.pesapal.com/pesapalv3/api"
+  @sandbox_url "https://cybqa.pesapal.com"
   @live_url "https://pay.pesapal.com/v3/api"
 
   # Get credentials from config
@@ -37,7 +37,15 @@ defmodule Pesapal do
     "#{base_url}#{url}"
   end
 
-  defp is_live do
+  def is_live do
     get_in(@config, [:live]) == :live
+  end
+
+  def iframe_url(order_id) do
+    if is_live() do
+      "#{@live_url}/pesapaliframe/PesapalIframe3/Index?OrderTrackingId=#{order_id}"
+    else
+      "#{@sandbox_url}/pesapaliframe/PesapalIframe3/Index?OrderTrackingId=#{order_id}"
+    end
   end
 end

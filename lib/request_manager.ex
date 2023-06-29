@@ -5,11 +5,7 @@ defmodule Pesapal.RequestManager do
 
   @user_agent "pesapal"
 
-  def process_request_url(url) do
-    full_url = Pesapal.get_url(url)
-    Logger.debug("Mpesa.RequestManager.Request_URL #{inspect(full_url)}")
-    full_url
-  end
+  def process_request_url(url), do: get_api_url(url)
 
   def process_request_body(body) do
     Logger.debug("Mpesa.RequestManager.Request_Body #{inspect(body)}")
@@ -132,6 +128,14 @@ defmodule Pesapal.RequestManager do
       {:error, %HTTPoison.Response{body: body}} ->
         Logger.error("Mpesa.RequestManager.SET_HEADER #{inspect(body)}")
         headers
+    end
+  end
+
+  defp get_api_url(url) do
+    if Pesapal.is_live() do
+      Pesapal.get_url("/v3/api") <> url
+    else
+      Pesapal.get_url("/pesapalv3/api") <> url
     end
   end
 end
