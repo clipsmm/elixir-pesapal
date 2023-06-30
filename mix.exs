@@ -5,7 +5,7 @@ defmodule Pesapal.MixProject do
     [
       app: :pesapal,
       version: "0.1.2",
-      elixir: "~> 1.14",
+      elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
