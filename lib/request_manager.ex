@@ -8,28 +8,24 @@ defmodule Pesapal.RequestManager do
   def process_request_url(url), do: get_api_url(url)
 
   def process_request_body(body) do
-    Logger.debug("Pesapal.RequestManager.Request_Body #{inspect(body)}")
+    Logger.debug("Pesapal.RequestManager.Request_Body", body: body)
     body |> Jason.encode!()
   end
 
   def process_response(%HTTPoison.Response{status_code: code, body: body} = response)
       when code in 200..299 do
-    Logger.debug("Pesapal.RequestManager.Process_Response.OK #{code} #{inspect(response)}")
+    Logger.debug("Pesapal.RequestManager.Process_Response.OK #{code}", body: body)
 
     result = Jason.decode!(body)
-
-    case result["error"] do
-      nil -> result
-      _ -> {:error, result["error"]}
-    end
   end
 
   def process_response(response) do
-    Logger.debug("Pesapal.RequestManager.Process_Response #{inspect(response)}")
+    Logger.debug("Pesapal.RequestManager.Process_Response", response: response)
   end
 
   def process_response(%HTTPoison.Error{reason: reason}) do
-    Logger.error("Pesapal.RequestManager.Process_Response_Error #{inspect(reason)}")
+    Logger.error("Pesapal.RequestManager.Process_Response_Error", reason: reason)
+    {:error, reason}
     reason
   end
 
@@ -121,9 +117,8 @@ defmodule Pesapal.RequestManager do
   """
   def order_status(order_id) do
     url = "/Transactions/GetTransactionStatus?orderTrackingId=#{order_id}"
-    headers = set_headers()
 
-    __MODULE__.get(url, headers)
+    __MODULE__.get(url, set_headers() |> set_auth_header())
   end
 
   defp set_headers(accept \\ "*/*") do
