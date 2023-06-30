@@ -1,6 +1,6 @@
 # Pesapal
 
-**TODO: Add description**
+**Pesapal library for elixir**
 
 ## Installation
 
@@ -10,7 +10,7 @@ by adding `pesapal` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:pesapal, "~> 0.1.0"}
+    {:pesapal, "~> 0.1.2"}
   ]
 end
 ```
