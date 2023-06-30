@@ -8,13 +8,13 @@ defmodule Pesapal.RequestManager do
   def process_request_url(url), do: get_api_url(url)
 
   def process_request_body(body) do
-    Logger.debug("Mpesa.RequestManager.Request_Body #{inspect(body)}")
+    Logger.debug("Pesapal.RequestManager.Request_Body #{inspect(body)}")
     body |> Jason.encode!()
   end
 
   def process_response(%HTTPoison.Response{status_code: code, body: body} = response)
       when code in 200..299 do
-    Logger.debug("Mpesa.RequestManager.Process_Response.OK #{code} #{inspect(response)}")
+    Logger.debug("Pesapal.RequestManager.Process_Response.OK #{code} #{inspect(response)}")
 
     result = Jason.decode!(body)
 
@@ -25,14 +25,13 @@ defmodule Pesapal.RequestManager do
   end
 
   def process_response(response) do
-    Logger.debug("Mpesa.RequestManager.Process_Response #{inspect(response)}")
-    IO.inspect(response)
+    Logger.debug("Pesapal.RequestManager.Process_Response #{inspect(response)}")
   end
 
-  # def process_response(%HTTPoison.Error{reason: reason}) do
-  #   Logger.error("Mpesa.RequestManager.Process_Response #{inspect(reason)}")
-  #   reason
-  # end
+  def process_response(%HTTPoison.Error{reason: reason}) do
+    Logger.error("Pesapal.RequestManager.Process_Response_Error #{inspect(reason)}")
+    reason
+  end
 
   @doc """
   Generate auth token
@@ -84,16 +83,25 @@ defmodule Pesapal.RequestManager do
 
     ## Examples
 
-        iex> Pesapal.create_order("123456", 200, "Order 123456", "123456", %{email_address: "
+        iex> Pesapal.create_order("123456", 200, "Order 123456", "123456", %{email_address: "abc@example.com"}, "http://example.com")
   """
-  @spec create_order(String.t(), float(), String.t(), String.t(), Map.t(), String.t()) :: any()
-  def create_order(order_no, amount, description, ipn_id, customer, currency \\ "KES") do
+  @spec create_order(String.t(), float(), String.t(), String.t(), Map.t(), String.t(), String.t()) ::
+          any()
+  def create_order(
+        order_no,
+        amount,
+        description,
+        ipn_id,
+        customer,
+        callback_url,
+        currency \\ "KES"
+      ) do
     body = %{
       "id" => order_no,
       "currency" => currency,
       "amount" => amount,
       "description" => description,
-      "callback_url" => Pesapal.config(:ipn_url),
+      "callback_url" => callback_url,
       "notification_id" => ipn_id,
       "billing_address" => customer
     }
@@ -102,16 +110,20 @@ defmodule Pesapal.RequestManager do
   end
 
   @doc """
-    Command_id: use "SalaryPayment", "BusinessPayment", "PromotionPayment"
-    amount: eg 200
-    partyb: your number eg 254718101442
+    Get payment status of the order
 
+    order_id: (string) unique order id
+
+    ## Examples
+
+        iex> Pesapal.order_status("123456")
+        %{}
   """
   def order_status(order_id) do
     url = "/Transactions/GetTransactionStatus?orderTrackingId=#{order_id}"
     headers = set_headers()
 
-    __MODULE__.post(url, %{}, headers)
+    __MODULE__.get(url, headers)
   end
 
   defp set_headers(accept \\ "*/*") do
@@ -126,7 +138,7 @@ defmodule Pesapal.RequestManager do
         Keyword.put(headers, :Authorization, "Bearer #{result["token"]}")
 
       {:error, %HTTPoison.Response{body: body}} ->
-        Logger.error("Mpesa.RequestManager.SET_HEADER #{inspect(body)}")
+        Logger.error("Pesapal.RequestManager.SET_HEADER #{inspect(body)}")
         headers
     end
   end
