@@ -4,7 +4,7 @@ defmodule Pesapal.MixProject do
   def project do
     [
       app: :pesapal,
-      version: "0.1.3",
+      version: "0.1.2",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -21,8 +21,8 @@ defmodule Pesapal.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:httpoison, "~> 2.1"},
-      {:jason, "~> 1.4"}
+      {:httpoison, "~> 1.8"},
+      {:jason, "~> 1.2"}
     ]
   end
 end
